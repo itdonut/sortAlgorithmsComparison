@@ -1,0 +1,9 @@
+#ifndef FILEOPENMODE_H_INCLUDED
+#define FILEOPENMODE_H_INCLUDED
+
+enum FileOpenMode {
+    READ,
+    WRITE
+};
+
+#endif // FILEOPENMODE_H_INCLUDED
