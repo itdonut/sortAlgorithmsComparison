@@ -11,7 +11,7 @@
 #include "Algorithm.h"
 #include "DataType.h"
 
-const uint32_t arraySize = 5000;
+const uint32_t arraySize = 50;
 const int64_t minValue = INT32_MIN;
 const int64_t maxValue = INT32_MAX;
 const std::string fileName = "result/file.txt";
@@ -71,13 +71,15 @@ int main()
     int32_t* arr4 = copyArray<int32_t>(arr1, arraySize);
     int32_t* arr5 = copyArray<int32_t>(arr1, arraySize);
     int32_t* arr6 = copyArray<int32_t>(arr1, arraySize);
+    int32_t* arr7 = copyArray<int32_t>(arr1, arraySize);
 
     //Printer::printArray2D<int32_t>(arr1, arraySize);
     //Printer::printArray2D<int32_t>(arr2, arraySize);
     //Printer::printArray2D<int32_t>(arr3, arraySize);
     //Printer::printArray2D<int32_t>(arr4, arraySize);
     //Printer::printArray2D<int32_t>(arr5, arraySize);
-    //Printer::printArray2D<int32_t>(arr6, arraySize);
+    Printer::printArray2D<int32_t>(arr6, arraySize);
+    //Printer::printArray2D<int32_t>(arr7, arraySize);
 
     std::cout << "Bubble sort has been starting" << std::endl;
     const auto start1 = std::chrono::high_resolution_clock::now();
@@ -109,18 +111,25 @@ int main()
     const auto end5 = std::chrono::high_resolution_clock::now();
     std::cout << "Merge sort has been ending" << std::endl;
 
-    std::cout << "Bubble_SIMD sort has been starting" << std::endl;
+    std::cout << "Bubble_SIMD (int32) sort has been starting" << std::endl;
     const auto start6 = std::chrono::high_resolution_clock::now();
     Sorting::bubble_SIMD_int32(arr6, arraySize);
     const auto end6 = std::chrono::high_resolution_clock::now();
-    std::cout << "Bubble_SIMD sort has been ending" << std::endl;
+    std::cout << "Bubble_SIMD (int32) sort has been ending" << std::endl;
+
+    std::cout << "Selection_SIMD (int32) sort has been starting" << std::endl;
+    const auto start7 = std::chrono::high_resolution_clock::now();
+    Sorting::selection_SIMD_int32(arr6, arraySize);
+    const auto end7 = std::chrono::high_resolution_clock::now();
+    std::cout << "Selection_SIMD (int32) sort has been ending" << std::endl;
 
     //Printer::printArray2D<int32_t>(arr1, arraySize);
     //Printer::printArray2D<int32_t>(arr2, arraySize);
     //Printer::printArray2D<int32_t>(arr3, arraySize);
     //Printer::printArray2D<int32_t>(arr4, arraySize);
     //Printer::printArray2D<int32_t>(arr5, arraySize);
-    //Printer::printArray2D<int32_t>(arr6, arraySize);
+    Printer::printArray2D<int32_t>(arr6, arraySize);
+    //Printer::printArray2D<int32_t>(arr7, arraySize);
 
     const std::chrono::duration<double> diff1 = end1 - start1;
     const std::chrono::duration<double> diff2 = end2 - start2;
@@ -128,6 +137,7 @@ int main()
     const std::chrono::duration<double> diff4 = end4 - start4;
     const std::chrono::duration<double> diff5 = end5 - start5;
     const std::chrono::duration<double> diff6 = end6 - start6;
+    const std::chrono::duration<double> diff7 = end7 - start7;
 
     double s1 = diff1.count();
     double s2 = diff2.count();
@@ -135,6 +145,7 @@ int main()
     double s4 = diff4.count();
     double s5 = diff5.count();
     double s6 = diff6.count();
+    double s7 = diff7.count();
 
     FileRowData data;
     data.algorithm = AlgorithmName[Algorithm::BUBBLE];
@@ -186,12 +197,20 @@ int main()
     row = fm->buildDataToWrite(data);
     fm->writeDataRow(row);
 
+    data.algorithm = AlgorithmName[Algorithm::SELECTION_SIMD];
+    data.duration = s7;
+    data.datetime = getTimeUTC();
+
+    row = fm->buildDataToWrite(data);
+    fm->writeDataRow(row);
+
     delete[] arr1;
     delete[] arr2;
     delete[] arr3;
     delete[] arr4;
     delete[] arr5;
     delete[] arr6;
+    delete[] arr7;
     delete fm;
 
     return 0;

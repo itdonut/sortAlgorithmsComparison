@@ -3,6 +3,7 @@
 
 #include <cstdint>
 #include <emmintrin.h>
+#include <smmintrin.h>
 
 class Sorting {
 public:
@@ -16,7 +17,10 @@ public:
     static void merge(T*, const uint32_t, const uint32_t);
     template<class T>
     static void selection(T*, const uint32_t);
+
+    // SIMD
     static void bubble_SIMD_int32(int32_t*,const uint32_t);
+    static void selection_SIMD_int32(int32_t*, const uint32_t);
 private:
     template<class T>
     static int32_t partition(T* arr, const int32_t, const int32_t);
@@ -24,6 +28,9 @@ private:
     static void swap(T&, T&);
     template<class T>
     static void merging(T* arr, const uint32_t, const uint32_t, const uint32_t);
+
+    //SIMD
+    static inline __m128i emulate_mm_min_epi32(const __m128i, const __m128i);
 };
 
 // template member must be implemented in the same file
@@ -98,42 +105,6 @@ void Sorting::merge(T* arr, const uint32_t left, const uint32_t right) {
         Sorting::merge<T>(arr, left, mid);         // Sort first half
         Sorting::merge<T>(arr, mid + 1, right);    // Sort second half
         Sorting::merging<T>(arr, left, mid, right);      // Merge the two halves
-    }
-}
-
-void Sorting::bubble_SIMD_int32(int32_t* arr, const uint32_t n) {
-    bool swapped = true;
-    while (swapped) {
-        swapped = false;
-        for (uint32_t i = 0; i < n - 1; i += 4) {
-            if (i + 4 <= n) {
-                // Load 4 integers into SSE registers
-                __m128i a = _mm_loadu_si128(reinterpret_cast<__m128i*>(&arr[i]));
-                __m128i b = _mm_loadu_si128(reinterpret_cast<__m128i*>(&arr[i + 1]));
-
-                // Compare adjacent elements
-                __m128i mask = _mm_cmpgt_epi32(a, b);
-
-                // Swap elements if necessary
-                __m128i min_vals = _mm_min_epi16(a, b);
-                __m128i max_vals = _mm_max_epi16(a, b);
-
-                // Store swapped results back to array
-                _mm_storeu_si128(reinterpret_cast<__m128i*>(&arr[i]), min_vals);
-                _mm_storeu_si128(reinterpret_cast<__m128i*>(&arr[i + 1]), max_vals);
-
-                // Check if a swap occurred
-                if (_mm_movemask_epi8(mask) != 0) {
-                    swapped = true;
-                }
-            } else {
-                // Handle remaining elements sequentially
-                if (arr[i] > arr[i + 1]) {
-                    Sorting::swap(arr[i], arr[i + 1]);
-                    swapped = true;
-                }
-            }
-        }
     }
 }
 
